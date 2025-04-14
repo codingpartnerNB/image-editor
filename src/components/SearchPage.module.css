@@ -1,0 +1,454 @@
+.searchPage {
+    padding: 2rem 1rem;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
+    color: #e6e6e6;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+
+  .myname{
+    font-weight: 800;
+  }
+  
+  .searchContainer {
+    text-align: center;
+    margin-bottom: 2rem;
+    width: 100%;
+    max-width: 800px;
+    padding: 0 1rem;
+  }
+  
+  .title {
+    color: #fff;
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+    font-weight: 700;
+    background: linear-gradient(90deg, #00dbde, #fc00ff);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  }
+  
+  .subtitle {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 1.1rem;
+    margin-bottom: 2rem;
+    font-weight: 300;
+  }
+  
+  .searchInputContainer {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
+  
+  .inputWrapper {
+    position: relative;
+    width: 100%;
+    max-width: 600px;
+  }
+  
+  .searchIcon {
+    position: absolute;
+    left: 1.2rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 1.2rem;
+    z-index: 1;
+  }
+  
+  .searchInput {
+    width: 100%;
+    padding: 1rem 1rem 1rem 3rem;
+    border: none;
+    font-size: 1rem;
+    outline: none;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    color: white;
+    border-radius: 50px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  }
+  
+  .searchInput:focus {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.3);
+  }
+  
+  .searchInput::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+  }
+  
+  .errorMessage {
+    padding: 1rem;
+    background: rgba(255, 99, 71, 0.2);
+    border: 1px solid rgba(255, 99, 71, 0.5);
+    border-radius: 8px;
+    color: #ffcccb;
+    margin: 1rem 0;
+    max-width: 800px;
+    width: 100%;
+    text-align: center;
+  }
+  
+  .loadingContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    color: rgba(255, 255, 255, 0.7);
+  }
+  
+  .loadingSpinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    border-top-color: #00dbde;
+    animation: spin 1s ease-in-out infinite;
+    margin-bottom: 1rem;
+  }
+  
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+  
+  .imageGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+    width: 100%;
+    max-width: 1400px;
+    padding: 0 1rem;
+    margin: 2rem 0;
+  }
+  
+  .imageCard {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+  }
+  
+  .imageCard:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+  }
+  
+  .imageWrapper {
+    position: relative;
+    width: 100%;
+    padding-top: 75%; /* 4:3 aspect ratio */
+    overflow: hidden;
+  }
+  
+  .image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+  }
+  
+  .imageCard:hover .image {
+    transform: scale(1.05);
+  }
+  
+  .imageOverlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  
+  .imageCard:hover .imageOverlay {
+    opacity: 1;
+  }
+  
+  .imageActions {
+    width: 100%;
+    display: flex;
+    padding: 0.5rem;
+    gap: 0.5rem;
+    justify-content: center;
+  }
+
+  .addCaptionButton {
+    position: absolute;
+    bottom: 1rem;
+    right: 1rem;
+    width: 50px;
+    height: 50px;
+    border: none;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #00dbde 0%, #fc00ff 100%);
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+    z-index: 2;
+  }
+
+  /* .addCaptionButton, .downloadButton {
+        flex: 1;
+        padding: 0.75rem;
+        border: none;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        position: relative;
+        overflow: hidden;
+        z-index: 1;
+        min-width: 120px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    } */
+  
+    /* .addCaptionButton {
+        background: linear-gradient(135deg, #00dbde 0%, #fc00ff 100%);
+        color: white;
+    }
+    
+    .downloadButton {
+        background: linear-gradient(135deg, #f5af19 0%, #f12711 100%);
+        color: white;
+    } */
+    
+    /* .addCaptionButton::before,
+    .downloadButton::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.3) 100%);
+        z-index: -1;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    } */
+    
+    /* .addCaptionButton:hover::before,
+    .downloadButton:hover::before {
+        opacity: 1;
+    } */
+    
+    /* .addCaptionButton:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0, 219, 222, 0.4);
+    }
+    
+    .downloadButton:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(241, 39, 17, 0.4);
+    }
+     */
+
+     .addCaptionButton:hover {
+        transform: scale(1.1);
+        animation: bounce 0.5s ease infinite alternate;
+      }
+
+      @keyframes bounce {
+        from {
+          transform: translateY(0) scale(1);
+        }
+        to {
+          transform: translateY(-5px) scale(1.1);
+        }
+      }
+
+      .plusIcon {
+        font-size: 1.2rem;
+      }
+
+    .buttonIcon {
+        font-size: 1rem;
+    }
+    
+    /* Add pulse animation for interactive feedback */
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { transform: scale(1); }
+    }
+    
+    .addCaptionButton:active,
+    .downloadButton:active {
+        animation: pulse 0.3s ease;
+    }
+      
+  
+  .imageInfo {
+    padding: 1rem;
+  }
+  
+  .imageTags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .tag {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.8);
+  }
+  
+  .imageStats {
+    display: flex;
+    gap: 1rem;
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.6);
+  }
+  
+  .statItem {
+    display: flex;
+    align-items: center;
+  }
+  
+  .pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    margin: 2rem 0;
+  }
+  
+  .paginationButton {
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    color: white;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  .paginationButton:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.2);
+  }
+  
+  .paginationButton:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  
+  .pageInfo {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.7);
+  }
+  
+  .emptyState {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 4rem 2rem;
+    color: rgba(255, 255, 255, 0.7);
+  }
+  
+  .emptyIllustration {
+    width: 150px;
+    height: 150px;
+    margin-bottom: 1.5rem;
+    opacity: 0.7;
+  }
+  
+  .emptyState h2 {
+    color: white;
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+  }
+  
+  .emptyState p {
+    font-size: 1rem;
+    max-width: 400px;
+  }
+  
+  @media (max-width: 768px) {
+    .title {
+      font-size: 2rem;
+    }
+  
+    .subtitle {
+      font-size: 1rem;
+    }
+  
+    .imageGrid {
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 1rem;
+    }
+    /* .addCaptionButton, .downloadButton {
+        padding: 0.6rem;
+        font-size: 0.8rem;
+        min-width: 110px;
+      } */
+  }
+  
+  @media (max-width: 480px) {
+    .searchPage {
+      padding: 1.5rem 0.5rem;
+    }
+  
+    .title {
+      font-size: 1.8rem;
+    }
+  
+    .searchInput {
+      padding: 0.8rem 0.8rem 0.8rem 2.5rem;
+      font-size: 0.9rem;
+    }
+  
+    .searchIcon {
+      left: 0.8rem;
+      font-size: 1rem;
+    }
+  
+    .imageGrid {
+      grid-template-columns: 1fr;
+    }
+  
+    .imageActions {
+        flex-direction: column;
+      }
+      
+      /* .addCaptionButton, .downloadButton {
+        width: 100%;
+      } */
+  } 
