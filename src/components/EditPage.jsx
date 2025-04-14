@@ -15,8 +15,7 @@ function EditPage({ selectedImage }) {
   const [textColor, setTextColor] = useState('#ffffff');
   const [borderWidth, setBorderWidth] = useState(5);
   const [showDelete, setShowDelete] = useState(false);
-    // Add this new state for the download dropdown
-    const [showDownloadOptions, setShowDownloadOptions] = useState(false);
+  const [showDownloadOptions, setShowDownloadOptions] = useState(false);
   const navigate = useNavigate();
   
 
@@ -28,9 +27,7 @@ function EditPage({ selectedImage }) {
     const containerHeight = container.clientHeight;
 
     const fabricCanvas = new fabric.Canvas(canvasRef.current, {
-    //   width: Math.min(800, window.innerWidth - 40),
       width: containerWidth,
-    //   height: Math.min(600, window.innerHeight - 200),
       height: containerHeight,
       backgroundColor: 'transparent',
       selection: true,
@@ -38,35 +35,36 @@ function EditPage({ selectedImage }) {
     });
 
     if (selectedImage) {
-      fabric.Image.fromURL(selectedImage, (img) => {
-        const scale = Math.min(
-        //   fabricCanvas.width / img.width,
-        //   fabricCanvas.height / img.height
-        containerWidth / img.width,
-        containerHeight / img.height
-        );
-        img.scale(scale);
-        img.set({
-          selectable: false,
-          evented: false,
-          name: 'backgroundImage',
-          originX: 'left',
-          originY: 'top'
-        });
-        // Center the image in the container
-        const left = (containerWidth - (img.width * scale)) / 2;
-        const top = (containerHeight - (img.height * scale)) / 2;
-        img.set({
-          left: left,
-          top: top
-        });
-        fabricCanvas.add(img);
-        // fabricCanvas.centerObject(img);
-        fabricCanvas.renderAll();
-      });
+      fabric.Image.fromURL(
+        selectedImage,
+        (img) => {
+          const scale = Math.min(
+            containerWidth / img.width,
+            containerHeight / img.height
+          );
+          img.scale(scale);
+          img.set({
+            selectable: false,
+            evented: false,
+            name: 'backgroundImage',
+            originX: 'left',
+            originY: 'top',
+          });
+          const left = (containerWidth - img.width * scale) / 2;
+          const top = (containerHeight - img.height * scale) / 2;
+          img.set({
+            left: left,
+            top: top,
+          });
+          fabricCanvas.add(img);
+          fabricCanvas.renderAll();
+        },
+        {
+          crossOrigin: 'anonymous', // Add this line to fix CORS issues
+        }
+      );
     }
 
-    // Event listeners for object selection
     fabricCanvas.on('selection:created', () => {
       const activeObject = fabricCanvas.getActiveObject();
       setShowDelete(!!activeObject && (activeObject.type === 'i-text' || activeObject.isShape));
@@ -81,7 +79,6 @@ function EditPage({ selectedImage }) {
       setShowDelete(false);
     });
 
-    // Enable dragging and resizing
     fabricCanvas.on('object:moving', (options) => {
       options.target.setCoords();
     });
@@ -234,7 +231,6 @@ function EditPage({ selectedImage }) {
       const activeObject = canvas.getActiveObject();
       if (activeObject) {
         canvas.sendToBack(activeObject);
-        // Make sure it stays above the background image
         const background = canvas.getObjects().find(obj => obj.name === 'backgroundImage');
         if (background) {
           canvas.sendToBack(background);
@@ -244,132 +240,42 @@ function EditPage({ selectedImage }) {
     }
   };
 
-// const downloadEditedImage = async () => {
-//     if (canvas) {
-//       try {
-//         // Create a temporary canvas with the same dimensions
-//         const tempCanvas = document.createElement('canvas');
-//         tempCanvas.width = canvas.width;
-//         tempCanvas.height = canvas.height;
-//         const tempCtx = tempCanvas.getContext('2d');
-        
-//         // Fill with background gradient
-//         const gradient = tempCtx.createLinearGradient(0, 0, 0, tempCanvas.height);
-//         gradient.addColorStop(0, '#1a1a2e');
-//         gradient.addColorStop(1, '#16213e');
-//         tempCtx.fillStyle = gradient;
-//         tempCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
-        
-//         // First try to use toDataURL
-//         try {
-//           const dataURL = canvas.toDataURL({
-//             format: 'png',
-//             quality: 1.0,
-//           });
-          
-//           const link = document.createElement('a');
-//           link.download = `edited_image_${Date.now()}.png`;
-//           link.href = dataURL;
-//           document.body.appendChild(link);
-//           link.click();
-//           document.body.removeChild(link);
-//         } catch (error) {
-//           console.log('toDataURL failed, trying alternative method:', error);
-          
-//           // Alternative method using fabric's toDataURLWithMultiplier
-//           const dataURL = canvas.toDataURLWithMultiplier('png', 1);
-//           const link = document.createElement('a');
-//           link.download = `edited_image_${Date.now()}.png`;
-//           link.href = dataURL;
-//           document.body.appendChild(link);
-//           link.click();
-//           document.body.removeChild(link);
-//         }
-        
-//         setShowDownloadOptions(false);
-//       } catch (error) {
-//         console.error('Error downloading edited image:', error);
-//         alert('Could not download image. Please try again or use a different browser.');
-//       }
-//     }
-//   };
-
-
-const downloadEditedImage = () => {
+  const downloadEditedImage = () => {
     if (!canvas) return;
-  
-    // Create a temporary canvas to draw our final image
+
+    // Adjust the canvas dimensions to match the original image dimensions
+    const originalWidth = canvas.width;
+    const originalHeight = canvas.height;
+
+    // Create a temporary canvas to render the final image
     const tempCanvas = document.createElement('canvas');
-    const tempCtx = tempCanvas.getContext('2d');
-    
-    // Use original image dimensions if available, otherwise use canvas dimensions
-    const img = imageInstance?._element;
-    const originalWidth = img?.naturalWidth || canvas.width;
-    const originalHeight = img?.naturalHeight || canvas.height;
-  
-    // Set temp canvas dimensions
     tempCanvas.width = originalWidth;
     tempCanvas.height = originalHeight;
-  
-    // Fill with background color (optional)
-    tempCtx.fillStyle = '#000000';
-    tempCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
-  
-    // Create a promise to handle the image export
-    new Promise((resolve) => {
-      // First try to export with background image
-      canvas.clone(clonedCanvas => {
-        // Scale cloned canvas to original image dimensions
-        const scaleX = originalWidth / canvas.width;
-        const scaleY = originalHeight / canvas.height;
-        
-        // Create a new canvas for the scaled version
-        const scaledCanvas = document.createElement('canvas');
-        scaledCanvas.width = originalWidth;
-        scaledCanvas.height = originalHeight;
-        const scaledCtx = scaledCanvas.getContext('2d');
-        
-        // Scale and draw the cloned canvas
-        scaledCtx.scale(scaleX, scaleY);
-        scaledCtx.drawImage(clonedCanvas.lowerCanvasEl, 0, 0);
-        
-        // Draw onto our final canvas
-        tempCtx.drawImage(scaledCanvas, 0, 0);
-        resolve();
-      });
-    }).catch(() => {
-      // Fallback if clone fails (CORS issues)
-      const scaleX = originalWidth / canvas.width;
-      const scaleY = originalHeight / canvas.height;
-      
-      tempCtx.scale(scaleX, scaleY);
-      tempCtx.drawImage(canvas.lowerCanvasEl, 0, 0);
-    }).finally(() => {
-      // Create download link
-      const link = document.createElement('a');
-      link.download = `design-${Date.now()}.png`;
-      
-      // Convert to data URL and download
-      tempCanvas.toBlob(blob => {
+    const tempCtx = tempCanvas.getContext('2d');
+
+    // Render the canvas content onto the temporary canvas
+    tempCtx.drawImage(canvas.lowerCanvasEl, 0, 0, originalWidth, originalHeight);
+
+    // Export the canvas content as an image
+    tempCanvas.toBlob(blob => {
+        const link = document.createElement('a');
+        link.download = `edited-image-${Date.now()}.png`;
         const url = URL.createObjectURL(blob);
         link.href = url;
         document.body.appendChild(link);
         link.click();
-        
+
         // Clean up
         setTimeout(() => {
-          document.body.removeChild(link);
-          URL.revokeObjectURL(url);
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
         }, 100);
-      }, 'image/png', 1.0);
-    });
+    }, 'image/png', 1.0);
   };
 
-
-const downloadOriginalImage = async () => {
+  const downloadOriginalImage = async () => {
     if (selectedImage) {
       try {
-        // Fetch the image as a blob first to handle cross-origin issues
         const response = await fetch(selectedImage);
         const blob = await response.blob();
         const url = URL.createObjectURL(blob);
@@ -381,7 +287,6 @@ const downloadOriginalImage = async () => {
         link.click();
         document.body.removeChild(link);
         
-        // Clean up the object URL after some time
         setTimeout(() => {
           URL.revokeObjectURL(url);
         }, 100);
@@ -389,7 +294,6 @@ const downloadOriginalImage = async () => {
         setShowDownloadOptions(false);
       } catch (error) {
         console.error('Error downloading original image:', error);
-        // Fallback method if fetch fails
         const link = document.createElement('a');
         link.download = `original_image_${Date.now()}.png`;
         link.href = selectedImage;
@@ -401,20 +305,16 @@ const downloadOriginalImage = async () => {
     }
   };
 
-
   const handleResize = () => {
     if (canvas && canvasContainerRef.current) {
         const container = canvasContainerRef.current;
       const containerWidth = container.clientWidth;
       const containerHeight = container.clientHeight;
       canvas.setDimensions({
-        // width: Math.min(800, window.innerWidth - 40),
         width: containerWidth,
-        // height: Math.min(600, window.innerHeight - 200),
         height: containerHeight,
       });
 
-      // Resize and reposition background image if exists
       const bgImage = canvas.getObjects().find(obj => obj.name === 'backgroundImage');
       if (bgImage) {
         const scale = Math.min(
