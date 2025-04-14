@@ -13,7 +13,7 @@ function SearchPage({ setSelectedImage }) {
   const [hasSearched, setHasSearched] = useState(false);
   const navigate = useNavigate();
 
-  const API_KEY = import.meta.env.VITE_PIXABAY_API_KEY;
+  const API_KEY = import.meta.env.VITE_PIXABAY_API_KEY || '49733220-71d94483d8db574897e02cd83';
   const PER_PAGE = 12;
 
   const searchImages = useCallback(async (newPage = 1) => {
