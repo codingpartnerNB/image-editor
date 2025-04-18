@@ -42,50 +42,28 @@ function EditPage({ selectedImage }) {
             containerWidth / img.width,
             containerHeight / img.height
           );
-          img.scale(scale);
+
+          const left = (containerWidth - img.width * scale) / 2;
+          const top = (containerHeight - img.height * scale) / 2;
+
           img.set({
+            scaleX: scale,
+            scaleY: scale,
+            left: left,
+            top: top,
             selectable: false,
             evented: false,
             name: 'backgroundImage',
-            originX: 'left',
-            originY: 'top',
           });
-          const left = (containerWidth - img.width * scale) / 2;
-          const top = (containerHeight - img.height * scale) / 2;
-          img.set({
-            left: left,
-            top: top,
-          });
+
           fabricCanvas.add(img);
           fabricCanvas.renderAll();
         },
         {
-          crossOrigin: 'anonymous', // Add this line to fix CORS issues
+          crossOrigin: 'anonymous', // Fix CORS issues
         }
       );
     }
-
-    fabricCanvas.on('selection:created', () => {
-      const activeObject = fabricCanvas.getActiveObject();
-      setShowDelete(!!activeObject && (activeObject.type === 'i-text' || activeObject.isShape));
-    });
-
-    fabricCanvas.on('selection:updated', () => {
-      const activeObject = fabricCanvas.getActiveObject();
-      setShowDelete(!!activeObject && (activeObject.type === 'i-text' || activeObject.isShape));
-    });
-
-    fabricCanvas.on('selection:cleared', () => {
-      setShowDelete(false);
-    });
-
-    fabricCanvas.on('object:moving', (options) => {
-      options.target.setCoords();
-    });
-
-    fabricCanvas.on('object:scaling', (options) => {
-      options.target.setCoords();
-    });
 
     setCanvas(fabricCanvas);
 
@@ -93,6 +71,18 @@ function EditPage({ selectedImage }) {
       fabricCanvas.dispose();
     };
   }, [selectedImage]);
+
+  useEffect(() => {
+    if (canvas) {
+      canvas.on('selection:created', () => {
+        setShowDelete(true);
+      });
+
+      canvas.on('selection:cleared', () => {
+        setShowDelete(false);
+      });
+    }
+  }, [canvas]);
 
   const addText = () => {
     if (canvas) {
@@ -111,18 +101,13 @@ function EditPage({ selectedImage }) {
         name: 'text',
         selectable: true,
         hasControls: true,
-        lockMovementX: false,
-        lockMovementY: false,
-        lockRotation: false,
-        lockScalingX: false,
-        lockScalingY: false,
       });
       canvas.add(text);
-      canvas.bringToFront(text);
       canvas.setActiveObject(text);
       canvas.renderAll();
-      setActiveTool('text');
-      setShowDelete(true);
+
+      // Recalculate canvas and background image
+      handleResize();
     }
   };
 
@@ -141,11 +126,6 @@ function EditPage({ selectedImage }) {
         isShape: true,
         selectable: true,
         hasControls: true,
-        lockMovementX: false,
-        lockMovementY: false,
-        lockRotation: false,
-        lockScalingX: false,
-        lockScalingY: false,
       };
 
       switch (type) {
@@ -154,8 +134,6 @@ function EditPage({ selectedImage }) {
             ...shapeProps,
             width: 100,
             height: 100,
-            rx: 10,
-            ry: 10,
           });
           break;
         case 'circle':
@@ -172,13 +150,14 @@ function EditPage({ selectedImage }) {
           });
           break;
       }
+
       if (shape) {
         canvas.add(shape);
-        canvas.bringToFront(shape);
         canvas.setActiveObject(shape);
         canvas.renderAll();
-        setActiveTool(type);
-        setShowDelete(true);
+
+        // Recalculate canvas and background image
+        handleResize();
       }
     }
   };
@@ -189,7 +168,7 @@ function EditPage({ selectedImage }) {
       if (activeObject) {
         canvas.remove(activeObject);
         canvas.renderAll();
-        setShowDelete(false);
+        setShowDelete(false); // Optionally hide the delete button if needed
       }
     }
   };
@@ -307,9 +286,10 @@ function EditPage({ selectedImage }) {
 
   const handleResize = () => {
     if (canvas && canvasContainerRef.current) {
-        const container = canvasContainerRef.current;
+      const container = canvasContainerRef.current;
       const containerWidth = container.clientWidth;
       const containerHeight = container.clientHeight;
+
       canvas.setDimensions({
         width: containerWidth,
         height: containerHeight,
@@ -318,23 +298,23 @@ function EditPage({ selectedImage }) {
       const bgImage = canvas.getObjects().find(obj => obj.name === 'backgroundImage');
       if (bgImage) {
         const scale = Math.min(
-          containerWidth / (bgImage.width / bgImage.scaleX),
-          containerHeight / (bgImage.height / bgImage.scaleY)
+          containerWidth / bgImage.width,
+          containerHeight / bgImage.height
         );
-        
-        const newScaleX = scale * (bgImage.scaleX || 1);
-        const newScaleY = scale * (bgImage.scaleY || 1);
-    
-        const left = (containerWidth - (bgImage.width * newScaleX)) / 2;
-        const top = (containerHeight - (bgImage.height * newScaleY)) / 2;
-    
+
+        const left = (containerWidth - bgImage.width * scale) / 2;
+        const top = (containerHeight - bgImage.height * scale) / 2;
+
         bgImage.set({
-          scaleX: newScaleX,
-          scaleY: newScaleY,
+          scaleX: scale,
+          scaleY: scale,
           left: left,
-          top: top
+          top: top,
         });
+
+        bgImage.setCoords(); // Update coordinates
       }
+
       canvas.renderAll();
     }
   };
